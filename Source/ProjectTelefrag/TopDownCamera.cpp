@@ -64,7 +64,7 @@ void ATopDownCamera::OnTriggerOverlap(UPrimitiveComponent* OverlappedComponent, 
 		Player->SetCurrentCamera(Camera);
 
 		auto PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		PlayerController->SetViewTargetWithBlend(this);
+		PlayerController->SetViewTargetWithBlend(this,.5f);
 	}
 }
 

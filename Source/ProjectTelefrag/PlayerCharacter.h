@@ -32,8 +32,18 @@ private:
 	class UCameraComponent* CurrentCamera;
 
 	bool bCanTeleport;
+
+	bool bCanTelefrag = true;
 	
-	bool bLeftMouseDown;
+	bool bLeftMouseDown = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = true))
+	bool bDead = false;
+
+	FTimerHandle TelefragResetHandle;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Telefrag", meta = (AllowPrivateAccess = true))
+	float TelefragResetTime = 5.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = true))
 	float TraceLength = 1000.f;
@@ -50,4 +60,8 @@ public:
 
 	UCameraComponent* GetCurrentCamera() { return CurrentCamera; }
 	void SetCurrentCamera(UCameraComponent* NewCamera) { CurrentCamera = NewCamera; }
+
+	void ResetTelefrag() { bCanTelefrag = true; }
+
+	bool GetPlayerDead() { return bDead; }
 };

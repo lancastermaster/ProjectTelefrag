@@ -6,6 +6,9 @@
 #include "Engine/EngineTypes.h"
 #include "Math/UnrealMathUtility.h"
 #include "Components/BoxComponent.h"
+#include "Enemy.h"
+#include "EnemyManager.h"
+#include "TopDownCamera.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -19,6 +22,7 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	bCanTelefrag = true;
 }
 
 // Called every frame
@@ -26,10 +30,7 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bLeftMouseDown)
-	{
-		CursorToWorldLocation = GetCrosshairWorldPosition();
-	}
+	CursorToWorldLocation = GetCrosshairWorldPosition();
 }
 
 // Called to bind functionality to input
@@ -43,11 +44,63 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 void APlayerCharacter::Teleport()
 {
+	TArray<AActor*> OverlappingActors;
+
 	FVector TeleportLocation;
 	TeleportLocation = CursorToWorldLocation;
 	TeleportLocation.Z = GetActorLocation().Z;
 
-	SetActorLocation(TeleportLocation);
+	FHitResult SweepHit;
+	FVector Start = GetActorLocation();
+	FVector End = TeleportLocation;
+	FQuat Rotation;
+
+	
+	bool bObjectinWay = GetWorld()->SweepSingleByChannel(
+		SweepHit,
+		Start,
+		End,
+		Rotation,
+		ECollisionChannel::ECC_WorldDynamic,
+		FCollisionShape::MakeSphere(15.f)
+	);
+
+	if (bObjectinWay)
+	{
+
+		if (bCanTelefrag)
+		{
+			SetActorLocation(TeleportLocation);
+			GetOverlappingActors(OverlappingActors);
+
+			for (AActor* Actor : OverlappingActors)
+			{
+				auto Enemy = Cast<AEnemy>(Actor);
+				if (Enemy)
+				{
+					Enemy->Destroy();
+					Cast<AEnemyManager>(UGameplayStatics::GetActorOfClass(this, AEnemyManager::StaticClass()))->InitializeLevelEnemies();
+
+					bCanTelefrag = false;
+					GetWorldTimerManager().SetTimer(TelefragResetHandle, this, &APlayerCharacter::ResetTelefrag, TelefragResetTime, false);
+				}
+				else
+				{
+					SetActorLocation(TeleportLocation, true);
+				}
+			}
+
+		}
+		else
+		{
+			SetActorLocation(TeleportLocation, true);
+			UE_LOG(LogTemp, Warning, TEXT("Telefrag not ready"));
+		}
+	}
+	else
+	{
+		SetActorLocation(TeleportLocation,true);
+	}
 }
 
 void APlayerCharacter::CancelTeleport()
@@ -57,7 +110,7 @@ void APlayerCharacter::CancelTeleport()
 void APlayerCharacter::LeftMouseDown()
 {
 	bLeftMouseDown = true;
-	UE_LOG(LogTemp, Warning, TEXT("Crosshair World Position: %s"), *CursorToWorldLocation.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("Crosshair World Position: %s"), *CursorToWorldLocation.ToString());
 	//spawn targeting FX if you can teleport
 }
 
