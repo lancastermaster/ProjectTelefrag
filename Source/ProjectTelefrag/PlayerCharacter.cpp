@@ -9,13 +9,13 @@
 #include "Enemy.h"
 #include "EnemyManager.h"
 #include "TopDownCamera.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
 // Called when the game starts or when spawned
@@ -40,6 +40,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAction(TEXT("Teleport"), EInputEvent::IE_Pressed, this, &APlayerCharacter::LeftMouseDown);
 	PlayerInputComponent->BindAction(TEXT("Teleport"), EInputEvent::IE_Released, this, &APlayerCharacter::LeftMouseUp);
+
+	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &APlayerCharacter::MoveForward);
+	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &APlayerCharacter::MoveRight);
 }
 
 void APlayerCharacter::Teleport()
@@ -47,7 +50,15 @@ void APlayerCharacter::Teleport()
 	TArray<AActor*> OverlappingActors;
 
 	FVector TeleportLocation;
-	TeleportLocation = CursorToWorldLocation;
+
+	if (bUseMouse)
+	{
+		TeleportLocation = CursorToWorldLocation;
+	}
+	else
+	{
+		TeleportLocation = GetVelocity() * TraceLength;
+	}
 	TeleportLocation.Z = GetActorLocation().Z;
 
 	FHitResult SweepHit;
@@ -121,6 +132,16 @@ void APlayerCharacter::LeftMouseUp()
 	Teleport();
 	//kill targeting FX
 	//teleport if you can
+}
+
+void APlayerCharacter::MoveForward(float InputAxis)
+{
+	AddMovementInput(FVector(1.f, 0.f, 0.f) * InputAxis);
+}
+
+void APlayerCharacter::MoveRight(float InputAxis)
+{
+	AddMovementInput(FVector(0.f, 1.f, 0.f) * InputAxis);
 }
 
 FVector APlayerCharacter::GetCrosshairWorldPosition()

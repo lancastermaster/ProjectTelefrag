@@ -26,6 +26,9 @@ protected:
 	void LeftMouseDown();
 	void LeftMouseUp();
 
+	void MoveForward(float InputAxis);
+	void MoveRight(float InputAxis);
+
 	FVector GetCrosshairWorldPosition();
 
 private:
@@ -36,6 +39,11 @@ private:
 	bool bCanTelefrag = true;
 	
 	bool bLeftMouseDown = false;
+
+	bool bCanMove = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = true))
+	bool bUseMouse = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = true))
 	bool bDead = false;
