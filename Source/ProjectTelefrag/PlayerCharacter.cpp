@@ -156,11 +156,11 @@ FVector APlayerCharacter::GetCrosshairWorldPosition()
 	}
 
 	FVector2D CursorPosition;
-	UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetMousePosition(CursorPosition.X, CursorPosition.Y);
+	UGameplayStatics::GetPlayerController(this, 0)->GetMousePosition(CursorPosition.X, CursorPosition.Y);
+	bool bCursorToWorld = UGameplayStatics::GetPlayerController(this, 0)->GetHitResultUnderCursor(ECollisionChannel::ECC_Visibility, true, ScreenTraceHit);
 
-	//Get screen space location of crosshairs
-	FVector2D CrossHairLocation(ViewPortSize.X / 2.f, ViewPortSize.Y / 2.f);
-	FVector CrosshairWorldPosition;
+	
+	/*FVector CrosshairWorldPosition;
 	FVector CrosshairWorldDirection;
 
 	//Get world position & direction of crosshairs
@@ -168,21 +168,21 @@ FVector APlayerCharacter::GetCrosshairWorldPosition()
 		UGameplayStatics::GetPlayerController(this, 0),
 		CursorPosition,
 		CrosshairWorldPosition,
-		CrosshairWorldDirection);
+		CrosshairWorldDirection);*/
 
-	if (bScreenToWorld)
+	if (bCursorToWorld)
 	{
-		FVector Start{ CrosshairWorldPosition };
-		FVector End{ CrosshairWorldPosition + CrosshairWorldDirection * TraceLength };
+		//FVector Start{CrosshairWorldPosition};
+		//FVector End{ CrosshairWorldPosition + CrosshairWorldDirection * TraceLength };
 		
 		if (ScreenTraceHit.bBlockingHit)
 		{
 			OutBeamLocation = ScreenTraceHit.Location;
 		}
-		else
+		/*else
 		{
 			OutBeamLocation = End;
-		}
+		}*/
 
 	}
 	return OutBeamLocation;
